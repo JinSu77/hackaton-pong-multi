@@ -20,6 +20,14 @@ public class PongPaddle : MonoBehaviour
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
+        // Désactiver les contrôles si c'est le serveur
+        if (Globals.IsServer)
+        {
+            Debug.Log($"[SERVER] Disabling paddle controls for {Player}");
+            enabled = false;
+            return;
+        }
+
         inputActions = new PongInput();
         switch (Player) {
           case PongPlayer.PlayerLeft:
