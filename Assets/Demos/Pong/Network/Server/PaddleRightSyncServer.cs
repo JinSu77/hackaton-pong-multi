@@ -1,11 +1,6 @@
 using UnityEngine;
 using System.Net;
 
-[System.Serializable]
-public class PaddleRightState {
-    public Vector3 Position;
-}
-
 public class PaddleRightSyncServer : MonoBehaviour
 {
     ServerManager ServerMan;

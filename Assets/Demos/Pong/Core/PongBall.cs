@@ -9,6 +9,7 @@ public enum PongBallState {
 public class PongBall : MonoBehaviour
 {
     public float Speed = 1;
+    private bool canMove = false; //contrôler le mouvement
 
     Vector3 Direction;
     PongBallState _State = PongBallState.Playing;
@@ -27,21 +28,43 @@ public class PongBall : MonoBehaviour
     }
 
     void Start() {
-      Direction = new Vector3(
-        Random.Range(0.5f, 1),
-        Random.Range(-0.5f, 0.5f),
-        0
-      );
-      Direction.x *= Mathf.Sign(Random.Range(-100, 100));
-      Direction.Normalize();
+      ResetBall();
+    }
+
+    public void ResetBall()
+    {
+        // Réinitialiser la position et la direction
+        transform.position = Vector3.zero;
+        Direction = new Vector3(
+            Random.Range(0.5f, 1),
+            Random.Range(-0.5f, 0.5f),
+            0
+        );
+        Direction.x *= Mathf.Sign(Random.Range(-100, 100));
+        Direction.Normalize();
     }
 
     void Update() {
-      if (State != PongBallState.Playing) {
+      if (State != PongBallState.Playing || !canMove) {
         return;
       }
 
       transform.position = transform.position + (Direction * Speed * Time.deltaTime);
+    }
+
+    // Méthode appelée par le ServerManager quand deux clients sont connectés
+    public void StartMoving()
+    {
+        Debug.Log("[BALL] Starting movement - Two players connected!");
+        canMove = true;
+    }
+
+    // Méthode appelée si un joueur se déconnecte
+    public void StopMoving()
+    {
+        Debug.Log("[BALL] Stopping movement - Waiting for players...");
+        canMove = false;
+        ResetBall();
     }
 
     void OnCollisionEnter(Collision c) {

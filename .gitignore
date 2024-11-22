@@ -11,3 +11,6 @@
 *.0.2.zip
 *.zip
 /UserSettings/
+*.DS_Store
+*.idea
+

@@ -6,6 +6,8 @@ public class ServerManager : MonoBehaviour
 {
     public UDPService UDP;
     public int ListenPort = 25000;
+    private PongBall ball;
+    private const int REQUIRED_PLAYERS = 2;
 
     public Dictionary<string, IPEndPoint> Clients = new Dictionary<string, IPEndPoint>(); 
 
@@ -19,6 +21,7 @@ public class ServerManager : MonoBehaviour
     void Start()
     {
         UDP.Listen(ListenPort);
+        ball = FindFirstObjectByType<PongBall>();
 
         UDP.OnMessageReceived +=  
             (string message, IPEndPoint sender) => {
@@ -32,6 +35,7 @@ public class ServerManager : MonoBehaviour
                         string addr = sender.Address.ToString() + ":" + sender.Port;
                         if (!Clients.ContainsKey(addr)) {
                             Clients.Add(addr, sender);
+                            CheckPlayersAndStartGame();
                         }
                         Debug.Log("There are " + Clients.Count + " clients present.");
 
@@ -41,6 +45,30 @@ public class ServerManager : MonoBehaviour
                 
                 //@todo : do something with the message that has arrived! 
             };
+    }
+
+    private void CheckPlayersAndStartGame()
+    {
+        if (Clients.Count == REQUIRED_PLAYERS)
+        {
+            Debug.Log("[SERVER] Two players connected - Starting game!");
+            ball.StartMoving();
+            BroadcastUDPMessage("GAME_START");
+        }
+        else if (Clients.Count < REQUIRED_PLAYERS && ball != null)
+        {
+            ball.StopMoving();
+        }
+    }
+
+    // Méthode pour gérer la déconnexion d'un client
+    public void RemoveClient(string clientAddr)
+    {
+        if (Clients.ContainsKey(clientAddr))
+        {
+            Clients.Remove(clientAddr);
+            CheckPlayersAndStartGame();
+        }
     }
 
     public void BroadcastUDPMessage(string message) {
