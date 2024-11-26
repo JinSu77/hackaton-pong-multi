@@ -5,6 +5,8 @@ using TMPro;
 public class MenuUI : MonoBehaviour
 {
     public TMP_InputField InpIP;
+    public GameObject TypeUserPanel;
+    public GameObject TeamHubPanel;
 
     void Start()
     {
@@ -30,5 +32,11 @@ public class MenuUI : MonoBehaviour
         }
         
         SceneManager.LoadScene("Pong");
+    }
+
+    public void JoinAsClient()
+    {
+        TypeUserPanel.SetActive(false);
+        TeamHubPanel.SetActive(true);
     }
 }
