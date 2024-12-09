@@ -67,6 +67,16 @@ public class UDPService : MonoBehaviour
         }
     }
 
+    public void Close()
+    {
+        if (udp != null)
+        {
+            udp.Close();
+            udp = null;
+            Debug.Log("UDP socket closed.");
+        }
+    }
+
     void Update() {
         ReceiveUDP();
     }
