@@ -18,17 +18,22 @@ public class ClientManager : MonoBehaviour
 
     void Start()
     {
-        UDP.InitClient();
+    UDP.InitClient();
+    ServerEndpoint = new IPEndPoint(IPAddress.Parse(Globals.ServerIP), ServerPort);
+    Debug.Log($"[CLIENT] Connexion au serveur : {Globals.ServerIP}:{ServerPort}");
+        
+    UDP.OnMessageReceived += (string message, IPEndPoint sender) => {
+        Debug.Log("[CLIENT] Message received from " + 
+            sender.Address.ToString() + ":" + sender.Port 
+            + " =>" + message);
 
-        // Utiliser l'IP stockée dans Globals
-        ServerEndpoint = new IPEndPoint(IPAddress.Parse(Globals.ServerIP), ServerPort);
-        Debug.Log($"[CLIENT] Connexion au serveur : {Globals.ServerIP}:{ServerPort}");
-            
-        UDP.OnMessageReceived += (string message, IPEndPoint sender) => {
-            Debug.Log("[CLIENT] Message received from " + 
-                sender.Address.ToString() + ":" + sender.Port 
-                + " =>" + message);
-        };
+        // Ajouter la gestion du message d'arrêt du serveur
+        if (message == "SERVER_STOPPING")
+        {
+            Debug.Log("[CLIENT] Server is stopping, returning to menu...");
+            UnityEngine.SceneManagement.SceneManager.LoadScene("PongMenu");
+        }
+    };
     }
 
     void Update()
@@ -37,5 +42,12 @@ public class ClientManager : MonoBehaviour
             UDP.SendUDPMessage("coucou", ServerEndpoint);
             NextCoucouTimeout = Time.time + 0.5f;
         }
+    }
+
+    public void Disconnect()
+    {
+        Debug.Log("[CLIENT] Disconnecting from server...");
+        UDP.SendUDPMessage("disconnect", ServerEndpoint);
+        UnityEngine.SceneManagement.SceneManager.LoadScene("PongMenu");
     }
 }

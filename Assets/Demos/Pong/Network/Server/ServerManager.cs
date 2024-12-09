@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Collections;
 using System.Net;
 using UnityEngine;
 
@@ -75,5 +76,28 @@ public class ServerManager : MonoBehaviour
         foreach (KeyValuePair<string, IPEndPoint> client in Clients) {
             UDP.SendUDPMessage(message, client.Value);
         }
+    }
+
+    public void StopServer()
+    {
+        Debug.Log("[SERVER] Stopping server...");
+        
+        BroadcastUDPMessage("SERVER_STOPPING");
+        
+        // Attendre un court instant pour que le message soit envoyé
+        StartCoroutine(StopServerCoroutine());
+    }
+
+    private IEnumerator StopServerCoroutine()
+    {
+        // Attendre un court instant pour que le message soit envoyé
+        yield return new WaitForSeconds(0.1f);
+        
+        // Fermer proprement l'UDP
+        UDP.Close();
+        
+        Clients.Clear();
+        
+        UnityEngine.SceneManagement.SceneManager.LoadScene("PongMenu");
     }
 }
