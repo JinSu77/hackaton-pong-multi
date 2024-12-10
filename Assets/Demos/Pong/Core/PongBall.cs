@@ -2,12 +2,14 @@ using UnityEngine;
 
 public enum PongBallState {
   Playing = 0,
-  PlayerLeftWin = 1,
-  PlayerRightWin = 2,
+  RedTeamWin = 1,
+  BlueTeamWin = 2,
 }
 
 public class PongBall : MonoBehaviour
 {
+    public ScoreText scoreText;
+
     public float Speed = 1;
     private bool canMove = false; //contrôler le mouvement
 
@@ -76,22 +78,28 @@ public class PongBall : MonoBehaviour
 
         case "PaddleLeft":
         case "PaddleRight":
-        case "BoundLeft":
-        case "BoundRight":
           Direction.x = -Direction.x;
           break;
-
-        /*
         case "BoundLeft":
-          _State = PongBallState.PlayerRightWin;
+          Direction.x = -Direction.x;
+          GameManager.Instance.AddPointToBlue();
           break;
-
         case "BoundRight":
-          _State = PongBallState.PlayerLeftWin;
+          Direction.x = -Direction.x;
+          GameManager.Instance.AddPointToRed();
           break;
-        */
 
-      }
+                /*
+                case "BoundLeft":
+                  _State = PongBallState.RedTeamWin;
+                  break;
+
+                case "BoundRight":
+                  _State = PongBallState.BlueTeamWin;
+                  break;
+                */
+
+        }
     }
 
 }

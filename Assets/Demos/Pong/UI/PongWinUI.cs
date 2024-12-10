@@ -25,11 +25,11 @@ public class PongWinUI : MonoBehaviour
           case PongBallState.Playing:
             Panel.SetActive(false);
             break;
-          case PongBallState.PlayerLeftWin:
+          case PongBallState.RedTeamWin:
             Panel.SetActive(true);
             PlayerLeft.SetActive(true);
             break;
-          case PongBallState.PlayerRightWin:
+          case PongBallState.BlueTeamWin:
             Panel.SetActive(true);
             PlayerRight.SetActive(true);
             break;
