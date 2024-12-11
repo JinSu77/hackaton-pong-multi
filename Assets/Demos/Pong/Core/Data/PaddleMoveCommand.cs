@@ -4,5 +4,6 @@ namespace Pong.Core.Data
     public class PaddleMoveCommand
     {
         public float Direction;
+        public string State = "Stopped";
     }
 }

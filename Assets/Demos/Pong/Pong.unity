@@ -301,7 +301,7 @@ GameObject:
   - component: {fileID: 215519375}
   m_Layer: 0
   m_Name: BoundRight
-  m_TagString: Untagged
+  m_TagString: GoalRight
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -982,7 +982,7 @@ GameObject:
   - component: {fileID: 504387510}
   m_Layer: 0
   m_Name: BoundTop
-  m_TagString: Untagged
+  m_TagString: Boundary
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -1169,7 +1169,7 @@ GameObject:
   - component: {fileID: 576445101}
   m_Layer: 0
   m_Name: BoundLeft
-  m_TagString: Untagged
+  m_TagString: GoalLeft
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -1457,13 +1457,12 @@ GameObject:
   - component: {fileID: 807978586}
   - component: {fileID: 807978585}
   - component: {fileID: 807978584}
-  - component: {fileID: 807978588}
   - component: {fileID: 807978591}
-  - component: {fileID: 807978590}
+  - component: {fileID: 807978592}
   - component: {fileID: 807978589}
   m_Layer: 0
   m_Name: PaddleRight
-  m_TagString: Untagged
+  m_TagString: Paddle
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -1557,22 +1556,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1069797442}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &807978588
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 807978583}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: bacdeada40f4241b4a9e9fe25b22b34e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  Player: 2
-  Speed: 5
-  MinY: -4
-  MaxY: 4
 --- !u!54 &807978589
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -1600,18 +1583,6 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
---- !u!114 &807978590
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 807978583}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: af65d76e536fa40a190659c56959537f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!114 &807978591
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1624,6 +1595,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2237687c6413844a2b0c4e5d724dee32, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  IsLeftPaddle: 0
+--- !u!114 &807978592
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 807978583}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ac9e5db1a4f0840898fd269c7c978b8c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  IsLeftPaddle: 0
 --- !u!1 &813164159
 GameObject:
   m_ObjectHideFlags: 0
@@ -1769,13 +1754,12 @@ GameObject:
   - component: {fileID: 814606655}
   - component: {fileID: 814606654}
   - component: {fileID: 814606653}
-  - component: {fileID: 814606657}
   - component: {fileID: 814606660}
   - component: {fileID: 814606659}
   - component: {fileID: 814606658}
   m_Layer: 0
   m_Name: PaddleLeft
-  m_TagString: Untagged
+  m_TagString: Paddle
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -1869,22 +1853,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1069797442}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &814606657
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 814606652}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: bacdeada40f4241b4a9e9fe25b22b34e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  Player: 1
-  Speed: 5
-  MinY: -4
-  MaxY: 4
 --- !u!54 &814606658
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -1921,9 +1889,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 814606652}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e0bc5c3dbf7e64f898b3b15bff3f6331, type: 3}
+  m_Script: {fileID: 11500000, guid: ac9e5db1a4f0840898fd269c7c978b8c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  IsLeftPaddle: 1
 --- !u!114 &814606660
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1933,9 +1902,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 814606652}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: dc4c78bc4ff6e452b8436fb2dbf2341b, type: 3}
+  m_Script: {fileID: 11500000, guid: 2237687c6413844a2b0c4e5d724dee32, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  IsLeftPaddle: 1
 --- !u!1 &832575517
 GameObject:
   m_ObjectHideFlags: 0
@@ -1999,7 +1969,7 @@ GameObject:
   - component: {fileID: 867576500}
   m_Layer: 0
   m_Name: BoundBottom
-  m_TagString: Untagged
+  m_TagString: Boundary
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -2773,7 +2743,7 @@ GameObject:
   - component: {fileID: 2030656713}
   - component: {fileID: 2030656712}
   - component: {fileID: 2030656711}
-  - component: {fileID: 2030656716}
+  - component: {fileID: 2030656719}
   - component: {fileID: 2030656717}
   - component: {fileID: 2030656718}
   - component: {fileID: 2030656715}
@@ -2900,19 +2870,6 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
---- !u!114 &2030656716
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2030656710}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fa7d79bf690f04e10a30fe0c0afc6af1, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  Speed: 5
 --- !u!114 &2030656717
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2937,6 +2894,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4a8a9e4176358490aba059e1ad5fae05, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &2030656719
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2030656710}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: efaad5ae5366f46cdab5e1937b31238e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Speed: 4
 --- !u!1 &2130213939
 GameObject:
   m_ObjectHideFlags: 0

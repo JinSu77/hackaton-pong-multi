@@ -1,6 +1,8 @@
 using UnityEngine;
 using UnityEngine.UI;
 using Pong.Core;
+using Pong.Network.Server;
+using Pong.Network.Client;
 using Pong.Utils;
 
 namespace Pong.UI
@@ -15,7 +17,7 @@ namespace Pong.UI
 
         void Start()
         {
-            PongLogger.Configure(true, true);
+            PongLogger.Configure(true, false);
             PongLogger.Info("GameUI", "Game UI initialized.");
 
             if (Globals.IsServer)

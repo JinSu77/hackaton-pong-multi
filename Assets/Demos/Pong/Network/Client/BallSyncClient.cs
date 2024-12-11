@@ -1,43 +1,61 @@
 using UnityEngine;
-using Pong.Constants;
 using System.Net;
+using Pong.Constants;
 using Pong.Core;
 using Pong.Core.Data;
+using Pong.Utils;
 
-/// <summary>
-/// Synchronizes the ball's state on the client.
-/// </summary>
-public class BallSyncClient : MonoBehaviour
+namespace Pong.Network.Client
 {
-  private ClientManager ClientMan;
-
-  void Awake()
+  /// <summary>
+  /// Synchronizes the ball's state on the client.
+  /// </summary>
+  public class BallSyncClient : MonoBehaviour
   {
-    if (Globals.IsServer)
+    private ClientManager clientManager;
+    private Vector3 ballPosition;
+    private PongBallState ballState = PongBallState.Playing;
+
+    void Awake()
     {
-      enabled = false;
+      if (Globals.IsServer)
+      {
+        enabled = false;
+      }
     }
-  }
 
-  /// <summary>
-  /// Registers a message handler for ball updates.
-  /// </summary>
-  void Start()
-  {
-    ClientMan = FindFirstObjectByType<ClientManager>();
+    void Start()
+    {
+      clientManager = FindFirstObjectByType<ClientManager>();
+      MessageHandler.RegisterHandler(MessageType.BallUpdate, HandleBallUpdate);
+      MessageHandler.RegisterHandler(MessageType.GameOver, HandleGameOver);
+    }
 
-    // Register handler for ball updates
-    MessageHandler.RegisterHandler(MessageType.BallUpdate, HandleBallUpdate);
-  }
+    /// <summary>
+    /// Handles updates to the ball's position from the server.
+    /// </summary>
+    private void HandleBallUpdate(string data, IPEndPoint sender)
+    {
+      BallState state = JsonUtility.FromJson<BallState>(data);
+      ballPosition = state.Position;
+      transform.position = ballPosition;
+    }
 
-  /// <summary>
-  /// Handles ball position updates sent by the server.
-  /// </summary>
-  /// <param name="data">Serialized ball state data.</param>
-  /// <param name="sender">Sender's IP endpoint.</param>
-  private void HandleBallUpdate(string data, IPEndPoint sender)
-  {
-    BallState state = JsonUtility.FromJson<BallState>(data);
-    transform.position = state.Position;
+    /// <summary>
+    /// Handles game-over messages from the server.
+    /// </summary>
+    private void HandleGameOver(string data, IPEndPoint sender)
+    {
+      if (System.Enum.TryParse(data, out PongBallState newState))
+      {
+        ballState = newState;
+
+        if (ballState != PongBallState.Playing)
+        {
+          // Stop any local ball-related behavior
+          PongLogger.Info("BallSyncClient", $"Game over! State: {ballState}");
+        }
+      }
+    }
   }
 }

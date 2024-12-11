@@ -1,50 +1,62 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using Pong.Constants;
-using Pong.Core.Objects;
 
-public class PongWinUI : MonoBehaviour
+namespace Pong.UI
 {
-  public GameObject Panel;
-  public GameObject PlayerLeft;
-  public GameObject PlayerRight;
-
-  private PongBall ball;
-
-  void Start()
+  public class PongWinUI : MonoBehaviour
   {
-    Panel.SetActive(false);
-    PlayerLeft.SetActive(false);
-    PlayerRight.SetActive(false);
-    ball = GameObject.FindFirstObjectByType<PongBall>();
-  }
+    public GameObject Panel;
+    public GameObject PlayerLeft;
+    public GameObject PlayerRight;
 
-  void Update()
-  {
-    if (ball == null) return;
+    private PongBallState currentBallState = PongBallState.Playing;
 
-    switch (ball.State)
+    void Start()
     {
-      case PongBallState.Playing:
-        Panel.SetActive(false);
-        break;
-
-      case PongBallState.PlayerLeftWin:
-        Panel.SetActive(true);
-        PlayerLeft.SetActive(true);
-        PlayerRight.SetActive(false);
-        break;
-
-      case PongBallState.PlayerRightWin:
-        Panel.SetActive(true);
-        PlayerLeft.SetActive(false);
-        PlayerRight.SetActive(true);
-        break;
+      Panel.SetActive(false);
+      PlayerLeft.SetActive(false);
+      PlayerRight.SetActive(false);
     }
-  }
 
-  public void OnReplay()
-  {
-    SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+    void Update()
+    {
+      UpdateUI();
+    }
+
+    /// <summary>
+    /// Call this method when the ball state changes (e.g., from the server logic).
+    /// </summary>
+    public void SetBallState(PongBallState newState)
+    {
+      currentBallState = newState;
+    }
+
+    private void UpdateUI()
+    {
+      switch (currentBallState)
+      {
+        case PongBallState.Playing:
+          Panel.SetActive(false);
+          break;
+
+        case PongBallState.PlayerLeftWin:
+          Panel.SetActive(true);
+          PlayerLeft.SetActive(true);
+          PlayerRight.SetActive(false);
+          break;
+
+        case PongBallState.PlayerRightWin:
+          Panel.SetActive(true);
+          PlayerLeft.SetActive(false);
+          PlayerRight.SetActive(true);
+          break;
+      }
+    }
+
+    public void OnReplay()
+    {
+      SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+    }
   }
 }
