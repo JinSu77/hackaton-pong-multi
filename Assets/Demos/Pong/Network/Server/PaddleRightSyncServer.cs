@@ -1,49 +1,40 @@
 using UnityEngine;
-using System.Net;
+using Pong.Constants;
+using Pong.Core;
+using Pong.Core.Data;
 
+/// <summary>
+/// Synchronizes the right paddle state on the server.
+/// </summary>
 public class PaddleRightSyncServer : MonoBehaviour
 {
-    ServerManager ServerMan;
-    float NextUpdateTimeout = -1;
+    private ServerManager ServerMan;
+    private float NextUpdateTimeout = -1;
 
-    void Awake() {
-        if (!Globals.IsServer) {
+    void Awake()
+    {
+        if (!Globals.IsServer)
+        {
             enabled = false;
         }
     }
 
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
         ServerMan = FindFirstObjectByType<ServerManager>();
-        Debug.Log("[SERVER] PaddleRightSyncServer started");
-        
-        ServerMan.UDP.OnMessageReceived += (string message, IPEndPoint sender) => {
-            Debug.Log($"[SERVER] Received message: {message}");
-            
-            if (!message.StartsWith("PADDLE_RIGHT_UPDATE")) { return; }
-
-            string[] tokens = message.Split('|');
-            string json = tokens[1];
-            PaddleRightState state = JsonUtility.FromJson<PaddleRightState>(json);
-            
-            transform.position = state.Position;
-            Debug.Log($"[SERVER] Updated paddle position to: {state.Position}");
-        };
     }
 
-    // Update is called once per frame
     void Update()
     {
-        if (Time.time > NextUpdateTimeout) {
-            PaddleRightState state = new PaddleRightState {
-                Position = transform.position
-            };
-
+        if (Time.time > NextUpdateTimeout)
+        {
+            PaddleState state = new PaddleState { Position = transform.position };
             string json = JsonUtility.ToJson(state);
-            string message = "PADDLE_RIGHT_UPDATE|" + json;
-            Debug.Log($"[SERVER] Broadcasting position: {message}");
-            ServerMan.BroadcastUDPMessage(message);
+
+            if (ServerMan != null)
+            {
+                ServerMan.BroadcastUDPMessage($"{MessageType.PaddleRightUpdate}|{json}");
+            }
 
             NextUpdateTimeout = Time.time + 0.03f;
         }

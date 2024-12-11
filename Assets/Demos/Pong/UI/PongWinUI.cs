@@ -1,43 +1,50 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using Pong.Constants;
+using Pong.Core.Objects;
 
 public class PongWinUI : MonoBehaviour
 {
-    public GameObject Panel;
-    public GameObject PlayerLeft;
-    public GameObject PlayerRight;
+  public GameObject Panel;
+  public GameObject PlayerLeft;
+  public GameObject PlayerRight;
 
-    PongBall Ball;
+  private PongBall ball;
 
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+  void Start()
+  {
+    Panel.SetActive(false);
+    PlayerLeft.SetActive(false);
+    PlayerRight.SetActive(false);
+    ball = GameObject.FindFirstObjectByType<PongBall>();
+  }
+
+  void Update()
+  {
+    if (ball == null) return;
+
+    switch (ball.State)
     {
+      case PongBallState.Playing:
         Panel.SetActive(false);
-        PlayerLeft.SetActive(false);
+        break;
+
+      case PongBallState.PlayerLeftWin:
+        Panel.SetActive(true);
+        PlayerLeft.SetActive(true);
         PlayerRight.SetActive(false);
-        Ball = GameObject.FindFirstObjectByType<PongBall>();
-    }
+        break;
 
-    // Update is called once per frame
-    void Update()
-    {
-        switch (Ball.State) {
-          case PongBallState.Playing:
-            Panel.SetActive(false);
-            break;
-          case PongBallState.PlayerLeftWin:
-            Panel.SetActive(true);
-            PlayerLeft.SetActive(true);
-            break;
-          case PongBallState.PlayerRightWin:
-            Panel.SetActive(true);
-            PlayerRight.SetActive(true);
-            break;
-        }
-       
+      case PongBallState.PlayerRightWin:
+        Panel.SetActive(true);
+        PlayerLeft.SetActive(false);
+        PlayerRight.SetActive(true);
+        break;
     }
+  }
 
-    public void OnReplay() {
-      SceneManager.LoadScene(SceneManager.GetActiveScene().name);
-    }
+  public void OnReplay()
+  {
+    SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+  }
 }

@@ -1,55 +1,55 @@
-using System.Net;
 using UnityEngine;
+using Pong.Constants;
+using System.Net;
+using Pong.Core;
+using Pong.Core.Data;
+using Pong.Utils;
 
+/// <summary>
+/// Synchronizes the left paddle state on the client.
+/// </summary>
 public class PaddleLeftSyncClient : MonoBehaviour
 {
-    UDPService UDP;
-    PongInput input;
-    float moveSpeed = 5f;
-    ClientManager clientManager;
+    private ClientManager ClientMan;
+    private float NextUpdateTimeout = -1;
 
-    void Awake() {
-        if (Globals.IsServer) {
+    void Awake()
+    {
+        if (Globals.IsServer)
+        {
             enabled = false;
         }
-        input = new PongInput();
-        input.Enable();
     }
 
     void Start()
     {
-        UDP = FindFirstObjectByType<UDPService>();
-        clientManager = FindFirstObjectByType<ClientManager>();
+        ClientMan = FindFirstObjectByType<ClientManager>();
 
-        UDP.OnMessageReceived += (string message, IPEndPoint sender) => {
-            if (!message.StartsWith("PADDLE_LEFT_UPDATE")) { return; }
-
-            string[] tokens = message.Split('|');
-            string json = tokens[1];
-            PaddleLeftState state = JsonUtility.FromJson<PaddleLeftState>(json);
-            
-            transform.position = state.Position;
-        };
+        // Register handler for paddle left updates
+        MessageHandler.RegisterHandler(MessageType.PaddleLeftUpdate, HandlePaddleLeftUpdate);
     }
 
     void Update()
     {
-        float movement = input.Pong.Player1.ReadValue<float>();
-        
-        if (movement != 0) {
-            Debug.Log($"[CLIENT] Movement detected: {movement}");
+        float direction = Input.GetAxisRaw("Vertical");
+        PaddleMoveCommand command = new PaddleMoveCommand { Direction = direction };
+        string json = JsonUtility.ToJson(command);
 
-            Vector3 newPosition = transform.position;
-            newPosition.y += movement * moveSpeed * Time.deltaTime;
-            transform.position = newPosition;
+        ClientMan.UDP.SendUDPMessage($"{MessageType.PaddleLeftMove}|{json}", ClientMan.ServerEndpoint);
+    }
 
-            PaddleLeftState state = new PaddleLeftState {
-                Position = newPosition
-            };
-            string json = JsonUtility.ToJson(state);
-            string message = "PADDLE_LEFT_MOVE|" + json;
-            Debug.Log($"[CLIENT] Sending message to server: {message}");
-            UDP.SendUDPMessage(message, clientManager.ServerEndpoint);
-        }
+
+    /// <summary>
+    /// Handles paddle left position updates received from the server.
+    /// </summary>
+    /// <param name="data">Serialized paddle state.</param>
+    /// <param name="sender">Sender's IP endpoint.</param>
+    private void HandlePaddleLeftUpdate(string data, IPEndPoint sender)
+    {
+        PaddleState state = JsonUtility.FromJson<PaddleState>(data);
+
+        transform.position = state.Position;
+
+        PongLogger.Verbose("Client", $"Updated local left paddle position to {state.Position}");
     }
 }

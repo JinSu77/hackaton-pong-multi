@@ -1,48 +1,57 @@
 using UnityEngine;
 using System.Net;
 using System.Net.Sockets;
+using System;
+using Pong.Utils;
+using Pong.Core;
 
+/// <summary>
+/// A service to manage UDP communication, including sending and receiving messages.
+/// </summary>
 public class UDPService : MonoBehaviour
 {
-    UdpClient udp;
-    IPEndPoint localEP;
+    private UdpClient udp;
+    private IPEndPoint localEP;
 
-    public delegate void UDPMessageReceive(string message, IPEndPoint sender);
-
-    public event UDPMessageReceive OnMessageReceived;
-
-    public bool Listen(int port) {
-        if (udp != null) {
-            Debug.LogWarning("Socket already initialized! Close it first.");
+    /// <summary>
+    /// Starts the UDP server and listens on the specified port.
+    /// </summary>
+    /// <param name="port">The port to listen on.</param>
+    /// <returns>True if the server starts successfully, false otherwise.</returns>
+    public bool Listen(int port)
+    {
+        if (udp != null)
+        {
+            PongLogger.Warning("UDPService", "Socket already initialized! Close it first.");
             return false;
         }
 
         try
         {
-            // Local End-Point
+            // Create and bind the UDP listener
             localEP = new IPEndPoint(IPAddress.Any, port);
-            
-            // Create the listener
-            udp = new UdpClient();
-            udp.Client.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
-            udp.ExclusiveAddressUse = false;
-            udp.Client.Bind(localEP);
+            udp = new UdpClient(localEP);
 
-            Debug.Log("Server listening on port: " + port);
-
+            PongLogger.Info("UDPService", $"Server listening on port: {port}");
             return true;
         }
-        catch (System.Exception ex)
+        catch (Exception ex)
         {
-            Debug.LogWarning("Error creating UDP listener on port: " + port + ": " + ex.Message);
-            CloseUDP();
+            PongLogger.Error("UDPService", $"Error creating UDP listener on port {port}: {ex.Message}");
+            Close();
             return false;
         }
     }
 
-    public bool InitClient() {
-        if (udp != null) {
-            Debug.LogWarning("Socket already initialized! Close it first.");
+    /// <summary>
+    /// Initializes a UDP client.
+    /// </summary>
+    /// <returns>True if the client initializes successfully, false otherwise.</returns>
+    public bool InitClient()
+    {
+        if (udp != null)
+        {
+            PongLogger.Warning("UDPService", "Socket already initialized! Close it first.");
             return false;
         }
 
@@ -51,79 +60,108 @@ public class UDPService : MonoBehaviour
             udp = new UdpClient();
             localEP = new IPEndPoint(IPAddress.Any, 0);
             udp.Client.Bind(localEP);
-        } catch (System.Exception ex)
-        {
-            Debug.LogWarning("Error creating UDP client: " + ex.Message);
-            CloseUDP();
-            return false;
+
+            PongLogger.Info("UDPService", "Client initialized and bound to a random port.");
+            return true;
         }
-        return true;
-    }
-    
-    private void CloseUDP() {
-        if (udp != null) {
-            udp.Close();
-            udp = null;
+        catch (Exception ex)
+        {
+            PongLogger.Error("UDPService", $"Error creating UDP client: {ex.Message}");
+            Close();
+            return false;
         }
     }
 
+    /// <summary>
+    /// Closes the UDP socket.
+    /// </summary>
     public void Close()
     {
         if (udp != null)
         {
             udp.Close();
             udp = null;
-            Debug.Log("UDP socket closed.");
+            PongLogger.Info("UDPService", "UDP socket closed.");
         }
     }
 
-    void Update() {
-        ReceiveUDP();
-    }
-
-    private void ReceiveUDP() {
-        if (udp == null) { return; }
-
-        while (udp.Available > 0)
-		{
-            IPEndPoint sourceEP = new IPEndPoint(IPAddress.Any, 0);
-			byte[] data = udp.Receive(ref sourceEP);
-
-			try
-			{
-				ParseString(data, sourceEP);
-			}
-			catch (System.Exception ex)
-			{
-				Debug.LogWarning("Error receiving UDP message: " + ex.Message);
-			}
-		}
-    }
-
-    private void ParseString(byte[] bytes, IPEndPoint sender) {
-        string message = System.Text.Encoding.UTF8.GetString(bytes);
-        OnMessageReceived.Invoke(message, sender);
-    }
-
-    public void SendUDPMessage(string message, IPEndPoint destination) {
-        byte[] bytes = System.Text.Encoding.UTF8.GetBytes(message);
-        SendUDPBytes(bytes, destination);
-    }
-
-    private void SendUDPBytes(byte[] bytes, IPEndPoint destination) {
-        if (udp == null) { 
-            Debug.LogWarning("Trying to send a message on socket that is not yet open");
-            return; 
-        }
-
-        try {
-            udp.Send(bytes, bytes.Length, destination);
-            
-        } catch (SocketException e)
+    void Update()
+    {
+        if (udp != null)
         {
-            Debug.LogWarning(e.Message);
+            ReceiveUDP();
         }
     }
 
+    /// <summary>
+    /// Receives UDP messages and routes them to the MessageHandler.
+    /// </summary>
+    private void ReceiveUDP()
+    {
+        while (udp.Available > 0)
+        {
+            IPEndPoint sourceEP = new IPEndPoint(IPAddress.Any, 0);
 
+            try
+            {
+                byte[] data = udp.Receive(ref sourceEP);
+                ParseString(data, sourceEP);
+            }
+            catch (Exception ex)
+            {
+                PongLogger.Warning("UDPService", $"Error receiving UDP message: {ex.Message}");
+            }
+        }
+    }
+
+    /// <summary>
+    /// Parses received messages and delegates them to the MessageHandler.
+    /// </summary>
+    /// <param name="bytes">The received message bytes.</param>
+    /// <param name="sender">The sender's IP endpoint.</param>
+    private void ParseString(byte[] bytes, IPEndPoint sender)
+    {
+        string message;
+
+        try
+        {
+            message = System.Text.Encoding.UTF8.GetString(bytes);
+        }
+        catch (Exception ex)
+        {
+            PongLogger.Error("UDPService", $"Error decoding message: {ex.Message}");
+            return;
+        }
+
+        PongLogger.Verbose("UDPService", $"Message received from {sender}: {message}");
+
+        try
+        {
+            MessageHandler.HandleMessage(message, sender);
+        }
+        catch (Exception ex)
+        {
+            PongLogger.Error("UDPService", $"Error handling message: {message}. Exception: {ex.Message}");
+        }
+    }
+
+    /// <summary>
+    /// Sends a message via UDP to a specified endpoint.
+    /// </summary>
+    /// <param name="message">The message to send.</param>
+    /// <param name="destination">The target endpoint.</param>
+    public void SendUDPMessage(string message, IPEndPoint destination)
+    {
+        byte[] bytes = System.Text.Encoding.UTF8.GetBytes(message);
+
+        try
+        {
+            udp.Send(bytes, bytes.Length, destination);
+            PongLogger.Verbose("UDPService", $"Message sent to {destination}: {message}");
+        }
+        catch (Exception ex)
+        {
+            PongLogger.Warning("UDPService", $"Error sending message to {destination}: {ex.Message}");
+        }
+    }
 }

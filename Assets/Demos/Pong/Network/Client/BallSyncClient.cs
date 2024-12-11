@@ -1,39 +1,43 @@
-using System.Net;
 using UnityEngine;
+using Pong.Constants;
+using System.Net;
+using Pong.Core;
+using Pong.Core.Data;
 
+/// <summary>
+/// Synchronizes the ball's state on the client.
+/// </summary>
 public class BallSyncClient : MonoBehaviour
 {
-    UDPService UDP;
+  private ClientManager ClientMan;
 
-    void Awake() {
-      if (Globals.IsServer) {
-        enabled = false;
-      }
-    }
-
-
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+  void Awake()
+  {
+    if (Globals.IsServer)
     {
-        UDP = FindFirstObjectByType<UDPService>();
-
-        UDP.OnMessageReceived += (string message, IPEndPoint sender) => {
-
-            if (!message.StartsWith("UPDATE")) { return; }
-
-            string[] tokens = message.Split('|');
-            string json = tokens[1];
-
-            BallState state = JsonUtility.FromJson<BallState>(json);
-            
-            transform.position = state.Position;
-
-        };
+      enabled = false;
     }
+  }
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
+  /// <summary>
+  /// Registers a message handler for ball updates.
+  /// </summary>
+  void Start()
+  {
+    ClientMan = FindFirstObjectByType<ClientManager>();
+
+    // Register handler for ball updates
+    MessageHandler.RegisterHandler(MessageType.BallUpdate, HandleBallUpdate);
+  }
+
+  /// <summary>
+  /// Handles ball position updates sent by the server.
+  /// </summary>
+  /// <param name="data">Serialized ball state data.</param>
+  /// <param name="sender">Sender's IP endpoint.</param>
+  private void HandleBallUpdate(string data, IPEndPoint sender)
+  {
+    BallState state = JsonUtility.FromJson<BallState>(data);
+    transform.position = state.Position;
+  }
 }

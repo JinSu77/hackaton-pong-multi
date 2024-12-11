@@ -1,34 +1,47 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using TMPro;
+using Pong.Core;
+using Pong.Utils;
 
-public class MenuUI : MonoBehaviour
+namespace Pong.UI
 {
-    public TMP_InputField InpIP;
-
-    void Start()
+    /// <summary>
+    /// Manages the main menu UI, including server/client setup and scene transitions.
+    /// </summary>
+    public class MenuUI : MonoBehaviour
     {
-        // Initialiser l'input avec l'IP par défaut
-        InpIP.text = "127.0.0.1";
-    }
+        public TMP_InputField InpIP;
 
-    public void SetRole(bool isServer) {
-        Globals.IsServer = isServer;
-        
-        // Si c'est un client, sauvegarder l'IP
-        if (!isServer && !string.IsNullOrEmpty(InpIP.text)) {
-            Globals.ServerIP = InpIP.text;
-            Debug.Log($"[MENU] IP serveur définie sur : {Globals.ServerIP}");
+        void Start()
+        {
+            InpIP.text = Globals.ServerIP;
+            PongLogger.Configure(true, true);
+            PongLogger.Info("MenuUI", "Menu initialized.");
         }
-    }
 
-    public void StartGame() {
-        // Vérification supplémentaire pour le client
-        if (!Globals.IsServer && string.IsNullOrEmpty(InpIP.text)) {
-            Debug.LogWarning("[MENU] Veuillez entrer une IP valide");
-            return;
+        public void SetRole(bool isServer)
+        {
+            Globals.IsServer = isServer;
+            PongLogger.Info("MenuUI", $"Role set to {(isServer ? "Server" : "Client")}.");
+
+            if (!isServer && !string.IsNullOrEmpty(InpIP.text))
+            {
+                Globals.ServerIP = InpIP.text;
+                PongLogger.Info("MenuUI", $"Server IP set to: {Globals.ServerIP}");
+            }
         }
-        
-        SceneManager.LoadScene("Pong");
+
+        public void StartGame()
+        {
+            if (!Globals.IsServer && string.IsNullOrEmpty(InpIP.text))
+            {
+                PongLogger.Warning("MenuUI", "Please enter a valid IP.");
+                return;
+            }
+
+            PongLogger.Info("MenuUI", "Loading Pong scene.");
+            SceneManager.LoadScene("Pong");
+        }
     }
 }

@@ -1,35 +1,51 @@
 using UnityEngine;
+using Pong.Constants;
+using Pong.Core;
+using Pong.Core.Data;
 
-public class BallSyncServer : MonoBehaviour
+namespace Pong.Core.Objects
 {
-    ServerManager ServerMan;
-    float NextUpdateTimeout = -1;
-
-    void Awake() {
-      if (!Globals.IsServer) {
-        enabled = false;
-      }
-
-    }
-
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    /// <summary>
+    /// Synchronizes the ball's state on the server.
+    /// </summary>
+    public class BallSyncServer : MonoBehaviour
     {
-        ServerMan = FindFirstObjectByType<ServerManager>();
-    }
+        private ServerManager serverManager;
+        private PongBall ball;
+        private float nextUpdateTimeout = -1;
 
-    // Update is called once per frame
-    void Update()
-    {  
-        if (Time.time > NextUpdateTimeout) {
-            BallState state = new BallState{
-                Position = transform.position
-            };
+        void Awake()
+        {
+            if (!Globals.IsServer)
+            {
+                enabled = false;
+            }
+        }
 
-            string json = JsonUtility.ToJson(state);
+        void Start()
+        {
+            serverManager = FindFirstObjectByType<ServerManager>();
+            ball = GetComponent<PongBall>();
+        }
 
-            ServerMan.BroadcastUDPMessage("UPDATE|" + json);
-            NextUpdateTimeout = Time.time + 0.03f;
+        void Update()
+        {
+            if (Time.time > nextUpdateTimeout && serverManager != null && ball != null)
+            {
+                BallState state = new BallState
+                {
+                    Position = ball.transform.position
+                };
+
+                string json = JsonUtility.ToJson(state);
+                serverManager.BroadcastUDPMessage($"{MessageType.BallUpdate}|{json}");
+                nextUpdateTimeout = Time.time + 0.03f; // Update every 30ms
+
+                if (ball.State != PongBallState.Playing)
+                {
+                    serverManager.BroadcastUDPMessage($"{MessageType.GameOver}|{ball.State}");
+                }
+            }
         }
     }
 }
