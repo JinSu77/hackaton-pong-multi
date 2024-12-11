@@ -11,6 +11,7 @@ public class ServerManager : MonoBehaviour
     private const int REQUIRED_PLAYERS = 2;
 
     public Dictionary<string, IPEndPoint> Clients = new Dictionary<string, IPEndPoint>(); 
+    private Dictionary<string, Team> playerTeams = new Dictionary<string, Team>();
 
     void Awake() {
         // Desactiver mon objet si je ne suis pas le serveur
@@ -19,33 +20,49 @@ public class ServerManager : MonoBehaviour
         }
     }
 
+    private Team AssignTeam()
+    {
+        int leftCount = 0;
+        int rightCount = 0;
+        
+        foreach (var team in playerTeams.Values)
+        {
+            if (team == Team.Left) leftCount++;
+            if (team == Team.Right) rightCount++;
+        }
+
+        return rightCount < leftCount ? Team.Right : Team.Left;
+    }
+
     void Start()
     {
         UDP.Listen(ListenPort);
         ball = FindFirstObjectByType<PongBall>();
 
-        UDP.OnMessageReceived +=  
-            (string message, IPEndPoint sender) => {
-                Debug.Log("[SERVER] Message received from " + 
-                    sender.Address.ToString() + ":" + sender.Port 
-                    + " =>" + message);
-                
-                switch (message) {
-                    case "coucou":
-                        // Ajouter le client à mon dictionnaire
-                        string addr = sender.Address.ToString() + ":" + sender.Port;
-                        if (!Clients.ContainsKey(addr)) {
-                            Clients.Add(addr, sender);
-                            CheckPlayersAndStartGame();
-                        }
-                        Debug.Log("There are " + Clients.Count + " clients present.");
+        UDP.OnMessageReceived += (string message, IPEndPoint sender) => {
+            string addr = sender.Address.ToString() + ":" + sender.Port;
+            
+            switch (message) {
+                case "coucou":
+                    if (!Clients.ContainsKey(addr)) 
+                    {
+                        Team assignedTeam = AssignTeam();
+                        playerTeams[addr] = assignedTeam;
+                        Clients.Add(addr, sender);
+                        
+                        UDP.SendUDPMessage($"TEAM_ASSIGNED|{assignedTeam}", sender);
+                        Debug.Log($"[SERVER] New player assigned to team {assignedTeam}");
+                        
+                        CheckPlayersAndStartGame();
+                    }
+                    UDP.SendUDPMessage("welcome!", sender);
+                    break;
 
-                        UDP.SendUDPMessage("welcome!", sender);
-                        break;
-                }
-                
-                //@todo : do something with the message that has arrived! 
-            };
+                case "disconnect":
+                    RemoveClient(addr);
+                    break;
+            }
+        };
     }
 
     private void CheckPlayersAndStartGame()
@@ -67,8 +84,10 @@ public class ServerManager : MonoBehaviour
     {
         if (Clients.ContainsKey(clientAddr))
         {
+            playerTeams.Remove(clientAddr);
             Clients.Remove(clientAddr);
             CheckPlayersAndStartGame();
+            Debug.Log($"[SERVER] Client {clientAddr} disconnected");
         }
     }
 
