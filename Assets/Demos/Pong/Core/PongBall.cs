@@ -8,6 +8,8 @@ public enum PongBallState {
 
 public class PongBall : MonoBehaviour
 {
+
+    public StartCountdown countDown;
     public ScoreText scoreText;
 
     public float Speed = 1;
@@ -83,22 +85,14 @@ public class PongBall : MonoBehaviour
         case "BoundLeft":
           Direction.x = -Direction.x;
           GameManager.Instance.AddPointToBlue();
+          countDown.CountdownToStart();
+
           break;
         case "BoundRight":
           Direction.x = -Direction.x;
           GameManager.Instance.AddPointToRed();
+          countDown.CountdownToStart();
           break;
-
-                /*
-                case "BoundLeft":
-                  _State = PongBallState.RedTeamWin;
-                  break;
-
-                case "BoundRight":
-                  _State = PongBallState.BlueTeamWin;
-                  break;
-                */
-
         }
     }
 
