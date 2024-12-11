@@ -126,7 +126,7 @@ public partial class @PongInput: IInputActionCollection2, IDisposable
 
     ~@PongInput()
     {
-        UnityEngine.Debug.Assert(!m_Pong.enabled, "This will cause a leak and performance issues, PongInput.Pong.Disable() has not been called.");
+       UnityEngine.Debug.Assert(!m_Pong.enabled, "This will cause a leak and performance issues, PongInput.Pong.Disable() has not been called.");
     }
 
     public void Dispose()
