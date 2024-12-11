@@ -4,15 +4,13 @@ public class GameManager : MonoBehaviour
 {
     public static GameManager Instance; // Singleton pour un accès global
 
-    public GameObject Panel;
-    public GameObject PlayerLeft;
-    public GameObject PlayerRight;
+    public PongWinUI pongWinUI;
 
     PongBall Ball;
 
     public int blueTeamScore = 0;
     public int redTeamScore = 0;
-    public int scoreToWin = 3;
+    public int scoreToWin = 1;
 
     public PongBallState currentState = PongBallState.Playing;
 
@@ -32,9 +30,7 @@ public class GameManager : MonoBehaviour
 
     void Start()
     {
-        Panel.SetActive(false);
-        PlayerLeft.SetActive(false);
-        PlayerRight.SetActive(false);
+        pongWinUI = FindFirstObjectByType<PongWinUI>();
         Ball = GameObject.FindFirstObjectByType<PongBall>();
     }
 
@@ -62,15 +58,13 @@ public class GameManager : MonoBehaviour
         {
             Time.timeScale = 0;
             currentState = PongBallState.BlueTeamWin;
-            Panel.SetActive(true);
-            PlayerLeft.SetActive(true);
+            pongWinUI.ShowWinPanel(PongBallState.BlueTeamWin);
         }
         else if (redTeamScore >= scoreToWin)
         {
             Time.timeScale = 0;
             currentState = PongBallState.RedTeamWin;
-            Panel.SetActive(true);
-            PlayerLeft.SetActive(true);
+            pongWinUI.ShowWinPanel(PongBallState.RedTeamWin);
         }
     }
 }
