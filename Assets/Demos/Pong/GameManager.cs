@@ -10,7 +10,7 @@ public class GameManager : MonoBehaviour
 
     public int blueTeamScore = 0;
     public int redTeamScore = 0;
-    public int scoreToWin = 1;
+    public int scoreToWin = 3;
 
     public PongBallState currentState = PongBallState.Playing;
 

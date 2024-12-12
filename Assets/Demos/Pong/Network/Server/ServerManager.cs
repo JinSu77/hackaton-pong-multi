@@ -8,6 +8,7 @@ public class ServerManager : MonoBehaviour
     public UDPService UDP;
     public int ListenPort = 25000;
     private PongBall ball;
+    private StartCountdown countDown;
     private const int REQUIRED_PLAYERS = 2;
 
     public Dictionary<string, IPEndPoint> Clients = new Dictionary<string, IPEndPoint>(); 
@@ -71,6 +72,7 @@ public class ServerManager : MonoBehaviour
         {
             Debug.Log("[SERVER] Two players connected - Starting game!");
             ball.StartMoving();
+            countDown.CountdownToStart();
             BroadcastUDPMessage("GAME_START");
         }
         else if (Clients.Count < REQUIRED_PLAYERS && ball != null)
